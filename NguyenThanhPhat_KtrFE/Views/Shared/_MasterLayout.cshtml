@@ -1,4 +1,4 @@
-﻿<style type="text/css">
+<style type="text/css">
     html {
         font-size: 14px;
         font-family: 'Franklin Gothic', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif
@@ -228,6 +228,32 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+    .checkout-btn {
+        background-color: red; /* Màu nền đỏ */
+        color: white; /* Màu chữ trắng */
+        border: none; /* Bỏ viền */
+        padding: 10px 15px; /* Thêm khoảng đệm */
+        border-radius: 4px; /* Bo góc */
+        cursor: pointer; /* Hiển thị con trỏ chuột khi di chuột qua */
+    }
+
+        .checkout-btn:hover {
+            background-color: darkred; /* Màu nền khi di chuột qua */
+        }
+    .add-discount-btn {
+        background-color: #007bff; /* Màu nền xanh */
+        color: white; /* Màu chữ trắng */
+        border: none; /* Bỏ viền */
+        padding: 10px 15px; /* Thêm khoảng đệm */
+        border-radius: 4px; /* Bo góc */
+        cursor: pointer; /* Hiển thị con trỏ chuột khi di chuột qua */
+        margin-left: 10px; /* Khoảng cách với nút "Áp dụng" */
+    }
+
+        .add-discount-btn:hover {
+            background-color: #0056b3; /* Màu nền khi di chuột qua */
+        }
+
 </style>
 <!DOCTYPE html>
 
@@ -330,47 +356,63 @@
             <aside class="cart-summary">
                 <h3>Tiki Khuyến Mãi</h3>
                 <div class="discount">
-                    <input type="text" id="discount-code" placeholder="Nhập mã giảm giá">
+                    <select id="discount-code" aria-label="Chọn mã giảm giá">
+                        <option value="">Chọn mã giảm giá</option>
+                        <option value="Giam50K">Giảm 50K</option>
+                        <option value="Giam50">Giảm 50%</option>
+                    </select>
                     <button onclick="applyDiscount()">Áp dụng</button>
+                    <button class="add-discount-btn" onclick="toggleDiscountInput()" aria-label="Chọn hoặc thêm mã giảm giá">Chọn hoặc thêm mã giảm giá</button>
                 </div>
+
 
                 <div class="summary">
                     <div class="row">
                         <span>Tạm tính:</span>
-                        <span>0đ</span>
+                        <span id="subtotal">0đ</span>
                     </div>
                     <div class="row">
                         <span>Tổng tiền:</span>
-                        <span>0đ</span>
+                        <span id="total">0đ</span>
                     </div>
                     <p class="freeship-info">FREESHIP đã được áp dụng!</p>
 
                     <button class="checkout-btn">Mua Hàng (0)</button>
                 </div>
             </aside>
+
+
         </main>
     </div>
     <script>
+        function toggleDiscountInput() {
+            // Bạn có thể thêm logic để hiển thị hoặc ẩn các tùy chọn mã giảm giá
+            alert("Hiển thị tùy chọn chọn hoặc thêm mã giảm giá!");
+        }
+    </script>
+    <script>
         function applyDiscount() {
             const discountCode = document.getElementById('discount-code').value;
-            const validCodeAmount = "Giam50K"; // Mã giảm giá 50k
-            const validCodePercentage = "Giam50"; // Mã giảm giá 50%
-            const discountAmount = 50000; // Giá trị giảm giá cho 50k
+            const validCodes = {
+                "Giam50K": 50000, // Giảm 50k
+                "Giam50": 0.5 // Giảm 50%
+            };
             const subtotalElement = document.querySelector('.summary .row:nth-child(1) span:last-child');
             const totalElement = document.querySelector('.summary .row:nth-child(2) span:last-child');
 
             let subtotal = parseInt(subtotalElement.textContent.replace(/\./g, '').replace('đ', '').trim());
             let total = subtotal;
 
-            if (discountCode === validCodeAmount) {
-                total -= discountAmount;
-                alert("Mã giảm giá 50K đã được áp dụng!");
-            }
-            else if (discountCode === validCodePercentage) {
-                total *= 0.5; // Giảm 50%
-                alert("Mã giảm giá 50% đã được áp dụng!");
-            }
-            else {
+            if (discountCode in validCodes) {
+                const discountValue = validCodes[discountCode];
+                if (discountValue === 50000) {
+                    total -= discountValue; // Giảm giá cố định
+                    alert("Mã giảm giá 50K đã được áp dụng!");
+                } else if (discountValue === 0.5) { //dfsfdsds
+                    total *= discountValue; // Giảm 50%
+                    alert("Mã giảm giá 50% đã được áp dụng!");
+                }
+            } else {
                 alert("Mã giảm giá không hợp lệ!");
             }
 
@@ -380,6 +422,7 @@
             // Cập nhật tổng tiền
             totalElement.textContent = total.toLocaleString('vi-VN') + 'đ';
         }
+
     </script>
 
     <script>
@@ -404,18 +447,23 @@
 
             // Tính tạm tính dựa trên số lượng và giá từng sản phẩm
             quantityInputs.forEach((input, index) => {
-                if (productCheckboxes[index].checked) { // Chỉ tính cho sản phẩm đã được chọn
+                if (productCheckboxes[index].checked) {
                     subtotal += parseInt(input.value) * prices[index];
                 }
             });
 
-            // Cập nhật tạm tính và tổng tiền
-            const subtotalElement = document.querySelector('.summary .row:nth-child(1) span:last-child');
-            const totalElement = document.querySelector('.summary .row:nth-child(2) span:last-child');
-
+            // Cập nhật tạm tính
+            const subtotalElement = document.getElementById('subtotal');
             subtotalElement.textContent = subtotal.toLocaleString('vi-VN') + 'đ';
+
+            // Cập nhật tổng tiền
+            const totalElement = document.getElementById('total');
             totalElement.textContent = subtotal.toLocaleString('vi-VN') + 'đ';
+
+            // Cập nhật nút "Mua Hàng"
+            updateCheckoutButton();
         }
+
         // Hàm cập nhật tổng giá tiền của từng sản phẩm
         function updateTotalPrice(price, quantity, totalPriceSelector, index) {
             const totalPrice = price * quantity;
